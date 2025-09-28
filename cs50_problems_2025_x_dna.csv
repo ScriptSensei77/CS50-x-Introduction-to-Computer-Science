@@ -1,2 +1,50 @@
-slug,github_id,github_username,name,github_url,timestamp,checks_passed,checks_run,style50_score,archive
-cs50/problems/2025/x/dna,214332159,ScriptSensei77,ScriptSensei77,https://github.com/me50/ScriptSensei77/tree/8aa443bbcbe1ca9d04bd2804ac60bed998c59661,"Sat, 12 Jul 2025 03:40:37PM PKT",21,21,0.9528301886792453,https://github.com/me50/ScriptSensei77/archive/8aa443bbcbe1ca9d04bd2804ac60bed998c59661.zip
+import csv
+import sys
+
+def main():
+    # Check for correct usage
+    if len(sys.argv) != 3:
+        print("Usage: python dna.py data.csv sequence.txt")
+        sys.exit(1)
+
+    # Read database file into a list of dictionaries
+    with open(sys.argv[1], newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        database = list(reader)
+
+    # Read DNA sequence file into a string
+    with open(sys.argv[2], 'r') as txtfile:
+        sequence = txtfile.read()
+
+    # Extract STRs from the database header
+    str_list = reader.fieldnames[1:]
+
+    # Count longest match of each STR in the sequence
+    str_counts = {}
+    for STR in str_list:
+        str_counts[STR] = longest_match(sequence, STR)
+
+    # Compare against each person in the database
+    for person in database:
+        match = all(int(person[STR]) == str_counts[STR] for STR in str_list)
+        if match:
+            print(person["name"])
+            return
+
+    print("No match")
+
+def longest_match(sequence, subsequence):
+    """Returns length of longest run of subsequence in sequence."""
+    longest_run = 0
+    sub_len = len(subsequence)
+    seq_len = len(sequence)
+
+    for i in range(seq_len):
+        count = 0
+        while sequence[i + count * sub_len : i + (count + 1) * sub_len] == subsequence:
+            count += 1
+        longest_run = max(longest_run, count)
+
+    return longest_run
+
+main()
